@@ -7,7 +7,7 @@
 </a>
 <a href="LICENSE-MIT">
 <img src="https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue" alt="License: MIT OR Apache-2.0"/>
-</a>
+</a>...
 <a href="https://www.rust-lang.org/">
 <img src="https://img.shields.io/badge/rust-1.85%2B-blue" alt="Rust 1.85+"/>
 </a>
