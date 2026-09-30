@@ -135,7 +135,7 @@ mod tests {
         l.prune(300, 200); // cutoff 100; ts==cutoff expired
         assert_eq!(l.total, 7);
         assert_eq!(l.len(), 1);
-        assert_eq!(l.entries.get(0).unwrap().ts, 200);
+        assert_eq!(l.entries.get(0).map(|entry| entry.ts), Some(200));
     }
 
     #[test]
@@ -145,7 +145,7 @@ mod tests {
         l.admit(100, 3);
         l.admit(100, 4);
         assert_eq!(l.len(), 1);
-        assert_eq!(l.entries.get(0).unwrap().amount, 7);
+        assert_eq!(l.entries.get(0).map(|entry| entry.amount), Some(7));
         l.admit(101, 5);
         assert_eq!(l.len(), 2);
         assert_eq!(l.total, 12);

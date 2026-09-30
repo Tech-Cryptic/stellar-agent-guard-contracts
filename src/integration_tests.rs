@@ -35,7 +35,10 @@ const SIG_EXPIRATION_LEDGER: u32 = 6_000_000;
 
 /// Number of `heartbeat` events published by the last contract invocation.
 fn heartbeat_event_count(env: &Env) -> usize {
-    let want = ScVal::Symbol(ScSymbol::try_from(std::vec::Vec::from("event_heartbeat")).unwrap());
+    let want = ScVal::Symbol(
+        ScSymbol::try_from(std::vec::Vec::from("event_heartbeat"))
+            .unwrap_or_else(|error| panic!("test event symbol conversion failed: {error:?}")),
+    );
     env.events()
         .all()
         .events()
@@ -183,8 +186,11 @@ impl Harness {
         SorobanAuthorizedInvocation {
             function: SorobanAuthorizedFunction::ContractFn(InvokeContractArgs {
                 contract_address: xdr::ScAddress::from(contract),
-                function_name: ScSymbol::try_from(fn_name.as_bytes().to_vec()).unwrap(),
-                args: xdr::VecM::try_from(sc_args).unwrap(),
+                function_name: ScSymbol::try_from(fn_name.as_bytes().to_vec()).unwrap_or_else(
+                    |error| panic!("test function symbol conversion failed: {error:?}"),
+                ),
+                args: xdr::VecM::try_from(sc_args)
+                    .unwrap_or_else(|error| panic!("test argument conversion failed: {error:?}")),
             }),
             sub_invocations: xdr::VecM::default(),
         }
@@ -222,7 +228,7 @@ impl Harness {
         let mut buf: std::vec::Vec<u8> = std::vec::Vec::new();
         preimage
             .write_xdr(&mut Limited::new(&mut buf, Limits::none()))
-            .unwrap();
+            .unwrap_or_else(|error| panic!("test payload serialization failed: {error:?}"));
         Sha256::digest(&buf).into()
     }
 
@@ -238,7 +244,11 @@ impl Harness {
                 address: xdr::ScAddress::from(&self.guard),
                 nonce,
                 signature_expiration_ledger: SIG_EXPIRATION_LEDGER,
-                signature: ScVal::Bytes(ScBytes::try_from(sig.to_vec()).unwrap()),
+                signature: ScVal::Bytes(
+                    ScBytes::try_from(sig.to_vec()).unwrap_or_else(|error| {
+                        panic!("test signature conversion failed: {error:?}")
+                    }),
+                ),
             }),
             root_invocation: root.clone(),
         }
@@ -315,7 +325,10 @@ impl Harness {
     /// `#[contractevent]` prepends the event name to the topic list, so the
     /// `result` topic (SPEC §9) is at index 1.
     fn emitted_allowed_auth(&self) -> bool {
-        let want = ScVal::Symbol(ScSymbol::try_from(std::vec::Vec::from("allowed")).unwrap());
+        let want = ScVal::Symbol(
+            ScSymbol::try_from(std::vec::Vec::from("allowed"))
+                .unwrap_or_else(|error| panic!("test result symbol conversion failed: {error:?}")),
+        );
         self.env
             .events()
             .all()
@@ -528,7 +541,10 @@ fn wrong_signature_is_rejected_by_host_crypto() {
             address: xdr::ScAddress::from(&h.guard),
             nonce,
             signature_expiration_ledger: SIG_EXPIRATION_LEDGER,
-            signature: ScVal::Bytes(ScBytes::try_from(sig.to_vec()).unwrap()),
+            signature: ScVal::Bytes(
+                ScBytes::try_from(sig.to_vec())
+                    .unwrap_or_else(|error| panic!("test signature conversion failed: {error:?}")),
+            ),
         }),
         root_invocation: root,
     };
@@ -570,7 +586,10 @@ fn rotated_agent_key_binds() {
             address: xdr::ScAddress::from(&h.guard),
             nonce: old_nonce,
             signature_expiration_ledger: SIG_EXPIRATION_LEDGER,
-            signature: ScVal::Bytes(ScBytes::try_from(old_sig.to_vec()).unwrap()),
+            signature: ScVal::Bytes(
+                ScBytes::try_from(old_sig.to_vec())
+                    .unwrap_or_else(|error| panic!("test signature conversion failed: {error:?}")),
+            ),
         }),
         root_invocation: old_root,
     };

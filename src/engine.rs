@@ -232,7 +232,8 @@ mod tests {
     fn addr(env: &Env, n: u8) -> Address {
         use soroban_sdk::xdr::{ContractId, Hash, ScAddress};
         let sc = ScAddress::Contract(ContractId(Hash([n; 32])));
-        Address::try_from_val(env, &sc).unwrap()
+        Address::try_from_val(env, &sc)
+            .unwrap_or_else(|error| panic!("test contract address conversion failed: {error:?}"))
     }
 
     fn base_policy(env: &Env) -> PolicyConfig {
